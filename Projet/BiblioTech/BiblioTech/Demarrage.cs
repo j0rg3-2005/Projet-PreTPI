@@ -1,3 +1,5 @@
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+
 namespace BiblioTech
 {
     public partial class Demarrage : Form
@@ -24,6 +26,10 @@ namespace BiblioTech
 
         private void btnSuivant_Click(object sender, EventArgs e)
         {
+            ChoixMenu frmChoixMenu = new ChoixMenu();
+            frmChoixMenu.Show();
+            frmChoixMenu.Closed += (s, args) => this.Close();
+            this.Hide();
 
         }
 
