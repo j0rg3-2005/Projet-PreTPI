@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +13,8 @@ namespace BiblioTech
 {
     public partial class ChoixMenu : Form
     {
+        public int IdUsers;
+
         public ChoixMenu()
         {
             InitializeComponent();
@@ -21,6 +24,15 @@ namespace BiblioTech
         private void ChoixMenu_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
+
+            List<Utilisateurs> utilisateur = Utilisateurs.GetAll(IdUsers);
+
+            textBox1.Text = utilisateur.ToString();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

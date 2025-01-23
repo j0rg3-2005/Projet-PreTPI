@@ -28,20 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
+            textBox1 = new TextBox();
             SuspendLayout();
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(199, 128);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(852, 23);
+            textBox1.TabIndex = 0;
+            textBox1.TextChanged += textBox1_TextChanged;
             // 
             // ChoixMenu
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Tan;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1555, 638);
+            Controls.Add(textBox1);
             Name = "ChoixMenu";
             Text = "ChoixMenu";
             Load += ChoixMenu_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private TextBox textBox1;
     }
 }

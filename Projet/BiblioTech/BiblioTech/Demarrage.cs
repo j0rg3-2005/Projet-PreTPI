@@ -30,7 +30,6 @@ namespace BiblioTech
             frmChoixMenu.Show();
             frmChoixMenu.Closed += (s, args) => this.Close();
             this.Hide();
-
         }
 
 
