@@ -28,16 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            textBox1 = new TextBox();
+            lstUsers = new ListView();
             SuspendLayout();
             // 
-            // textBox1
+            // lstUsers
             // 
-            textBox1.Location = new Point(199, 128);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(852, 23);
-            textBox1.TabIndex = 0;
-            textBox1.TextChanged += textBox1_TextChanged;
+            lstUsers.Location = new Point(132, 54);
+            lstUsers.Name = "lstUsers";
+            lstUsers.Size = new Size(130, 691);
+            lstUsers.TabIndex = 0;
+            lstUsers.UseCompatibleStateImageBehavior = false;
+            lstUsers.SelectedIndexChanged += lstUsers_SelectedIndexChanged;
             // 
             // ChoixMenu
             // 
@@ -45,16 +46,15 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Tan;
             ClientSize = new Size(1555, 638);
-            Controls.Add(textBox1);
+            Controls.Add(lstUsers);
             Name = "ChoixMenu";
             Text = "ChoixMenu";
             Load += ChoixMenu_Load;
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
-        private TextBox textBox1;
+        private ListView lstUsers;
     }
 }

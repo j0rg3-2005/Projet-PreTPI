@@ -25,12 +25,15 @@ namespace BiblioTech
         {
             this.WindowState = FormWindowState.Maximized;
 
-            List<Utilisateurs> utilisateur = Utilisateurs.GetAll(IdUsers);
+            List<Utilisateur> utilisateurs = Utilisateur.GetAll();
 
-            textBox1.Text = utilisateur.ToString();
+            for (int i = 0; i < utilisateurs.Count; i++)
+            {
+                lstUsers.Items.Add(utilisateurs[i].Prenom + " " + utilisateurs[i].Nom);
+            }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void lstUsers_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
