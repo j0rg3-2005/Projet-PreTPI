@@ -37,7 +37,7 @@
             // btnUsers
             // 
             btnUsers.Anchor = AnchorStyles.None;
-            btnUsers.Location = new Point(227, 220);
+            btnUsers.Location = new Point(227, 164);
             btnUsers.Name = "btnUsers";
             btnUsers.Size = new Size(75, 23);
             btnUsers.TabIndex = 0;
@@ -48,7 +48,7 @@
             // btnLends
             // 
             btnLends.Anchor = AnchorStyles.None;
-            btnLends.Location = new Point(356, 220);
+            btnLends.Location = new Point(356, 164);
             btnLends.Name = "btnLends";
             btnLends.Size = new Size(75, 23);
             btnLends.TabIndex = 1;
@@ -59,7 +59,7 @@
             // btnBooks
             // 
             btnBooks.Anchor = AnchorStyles.None;
-            btnBooks.Location = new Point(484, 220);
+            btnBooks.Location = new Point(484, 164);
             btnBooks.Name = "btnBooks";
             btnBooks.Size = new Size(75, 23);
             btnBooks.TabIndex = 2;
@@ -71,7 +71,7 @@
             // 
             lblWelcome.Anchor = AnchorStyles.None;
             lblWelcome.AutoSize = true;
-            lblWelcome.Location = new Point(269, 103);
+            lblWelcome.Location = new Point(269, 49);
             lblWelcome.Name = "lblWelcome";
             lblWelcome.Size = new Size(270, 15);
             lblWelcome.TabIndex = 3;
@@ -82,7 +82,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 434);
+            ClientSize = new Size(800, 320);
             Controls.Add(lblWelcome);
             Controls.Add(btnBooks);
             Controls.Add(btnLends);
