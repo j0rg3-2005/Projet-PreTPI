@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace BiblioTech
 {
-    public class Emprunts
+    public class Lends
     {
         public int Id { get; set; }
         public int IdUtilisateur { get; set; }
@@ -14,9 +14,9 @@ namespace BiblioTech
         public string Etat { get; set; }
 
         // Méthode pour récupérer tous les emprunts de la base de données
-        public static List<Emprunts> GetAll()
+        public static List<Lends> GetAll()
         {
-            List<Emprunts> empruntsList = new List<Emprunts>();
+            List<Lends> empruntsList = new List<Lends>();
 
             string query = "SELECT * FROM emprunts";  // Requête pour récupérer tous les emprunts
             MySqlCommand cmd = new MySqlCommand(query, Program.conn);  // Création de la commande SQL avec la connexion
@@ -24,17 +24,17 @@ namespace BiblioTech
 
             while (reader.Read())
             {
-                Emprunts emprunt = new Emprunts();
+                Lends lends = new Lends();
 
                 // Remplir les propriétés avec les données récupérées
-                emprunt.Id = reader["ID"] != DBNull.Value ? (int)reader["ID"] : 0;
-                emprunt.IdUtilisateur = reader["id_utilisateur"] != DBNull.Value ? (int)reader["id_utilisateur"] : 0;
-                emprunt.IdLivre = reader["id_livre"] != DBNull.Value ? (int)reader["id_livre"] : 0;
-                emprunt.DateDebut = reader["date_debut"] != DBNull.Value ? (DateTime)reader["date_debut"] : DateTime.MinValue;
-                emprunt.DateFin = reader["date_fin"] != DBNull.Value ? (DateTime?)reader["date_fin"] : null;  // Nullable DateTime pour DateFin
-                emprunt.Etat = reader["etat"] != DBNull.Value ? (string)reader["etat"] : string.Empty;
+                lends.Id = reader["ID"] != DBNull.Value ? (int)reader["ID"] : 0;
+                lends.IdUtilisateur = reader["id_utilisateur"] != DBNull.Value ? (int)reader["id_utilisateur"] : 0;
+                lends.IdLivre = reader["id_livre"] != DBNull.Value ? (int)reader["id_livre"] : 0;
+                lends.DateDebut = reader["date_debut"] != DBNull.Value ? (DateTime)reader["date_debut"] : DateTime.MinValue;
+                lends.DateFin = reader["date_fin"] != DBNull.Value ? (DateTime?)reader["date_fin"] : null;  // Nullable DateTime pour DateFin
+                lends.Etat = reader["etat"] != DBNull.Value ? (string)reader["etat"] : string.Empty;
 
-                empruntsList.Add(emprunt);  // Ajouter l'emprunt à la liste
+                empruntsList.Add(lends);  // Ajouter l'emprunt à la liste
             }
 
             reader.Close();  // Fermer le lecteur de données

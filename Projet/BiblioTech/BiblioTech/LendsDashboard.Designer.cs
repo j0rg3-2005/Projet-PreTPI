@@ -28,13 +28,23 @@
         /// </summary>
         private void InitializeComponent()
         {
+            flnpnlLends = new FlowLayoutPanel();
             SuspendLayout();
+            // 
+            // flnpnlLends
+            // 
+            flnpnlLends.AutoScroll = true;
+            flnpnlLends.Location = new Point(1301, 72);
+            flnpnlLends.Name = "flnpnlLends";
+            flnpnlLends.Size = new Size(200, 100);
+            flnpnlLends.TabIndex = 1;
             // 
             // frmLendsDashboard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1624, 696);
+            Controls.Add(flnpnlLends);
             Name = "frmLendsDashboard";
             Text = "LendsDashboard";
             Load += frmLendsDashboard_Load;
@@ -42,5 +52,7 @@
         }
 
         #endregion
+
+        private FlowLayoutPanel flnpnlLends;
     }
 }
