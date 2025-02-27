@@ -28,23 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            flnpnlBooks = new FlowLayoutPanel();
             SuspendLayout();
-            // 
-            // flnpnlBooks
-            // 
-            flnpnlBooks.AutoScroll = true;
-            flnpnlBooks.Location = new Point(1037, 61);
-            flnpnlBooks.Name = "flnpnlBooks";
-            flnpnlBooks.Size = new Size(200, 100);
-            flnpnlBooks.TabIndex = 1;
             // 
             // frmBooksDashboard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1399, 638);
-            Controls.Add(flnpnlBooks);
+            ClientSize = new Size(800, 450);
             Name = "frmBooksDashboard";
             Text = "BooksDashboard";
             Load += frmBooksDashboard_Load;
@@ -52,7 +42,5 @@
         }
 
         #endregion
-
-        private FlowLayoutPanel flnpnlBooks;
     }
 }

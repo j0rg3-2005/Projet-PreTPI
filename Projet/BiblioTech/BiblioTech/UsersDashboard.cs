@@ -26,7 +26,7 @@ namespace BiblioTech
             txtSelectedUserId.Multiline = true;
             txtSelectedUserId.WordWrap = true;
             txtSelectedUserId.ScrollBars = ScrollBars.Vertical;
-            txtSelectedUserId.Width = (int)(this.ClientSize.Width * 0.3);
+            txtSelectedUserId.Width = 300; // Valeur initiale
             txtSelectedUserId.Height = this.ClientSize.Height - 50; // Ajustement dynamique
             txtSelectedUserId.Location = new Point(10, 10);
 
@@ -61,7 +61,7 @@ namespace BiblioTech
                 btnShowUserInfo.Click += (s, ev) =>
                 {
                     // Mettre à jour le texte de la TextBox avec des informations
-                    txtSelectedUserId.Text = "INFOS DE L'UTILISATEUR" + Environment.NewLine +
+                    txtSelectedUserId.Text = "Infos de l'utilisateur" + Environment.NewLine +
                     Environment.NewLine + "- ID : " + utilisateur.Id.ToString() + Environment.NewLine +
                     Environment.NewLine + "- Prénom : " + utilisateur.Prenom + Environment.NewLine +
                     Environment.NewLine + "- Nom : " + utilisateur.Nom + Environment.NewLine +
