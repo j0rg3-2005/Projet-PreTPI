@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySqlConnector;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -9,7 +10,10 @@ namespace BiblioTech
     {
         TextBox txtSelectedUserId;
         TableLayoutPanel tblUsers;
-        int spacing = 20; // Espacement entre la TextBox et la liste
+        FlowLayoutPanel flpMain;
+        Button btnBack; // Bouton de retour
+        int spacing = 10;
+        int paddingMargin = 15;
 
         public frmUsersDashboard()
         {
@@ -19,6 +23,24 @@ namespace BiblioTech
         private void frmUsersDashboard_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Maximized;
+            this.Padding = new Padding(paddingMargin);
+
+            // Création du bouton de retour en haut à gauche
+            btnBack = new Button();
+            btnBack.Text = "Retour";
+            btnBack.AutoSize = true;
+            btnBack.Padding = new Padding(5);
+            btnBack.Click += btnBack_Click;
+            btnBack.Location = new Point(paddingMargin, paddingMargin); // Positionné en haut à gauche
+            this.Controls.Add(btnBack);
+
+            // Création du FlowLayoutPanel principal
+            flpMain = new FlowLayoutPanel();
+            flpMain.Dock = DockStyle.Fill;
+            flpMain.FlowDirection = FlowDirection.LeftToRight; // Modification pour un flux horizontal
+            flpMain.AutoScroll = true;
+            flpMain.Padding = new Padding(paddingMargin);
+            this.Controls.Add(flpMain);
 
             // Création de la TextBox
             txtSelectedUserId = new TextBox();
@@ -26,33 +48,29 @@ namespace BiblioTech
             txtSelectedUserId.Multiline = true;
             txtSelectedUserId.WordWrap = true;
             txtSelectedUserId.ScrollBars = ScrollBars.Vertical;
-            txtSelectedUserId.Width = 300; // Valeur initiale
-            txtSelectedUserId.Height = this.ClientSize.Height - 50; // Ajustement dynamique
-            txtSelectedUserId.Location = new Point(10, 10);
+            txtSelectedUserId.Width = (int)(this.ClientSize.Width * 0.35) - (2 * paddingMargin); // Redimensionnement
+            txtSelectedUserId.Height = this.ClientSize.Height - 100 - (2 * paddingMargin); // Ajustement de la hauteur
+            txtSelectedUserId.Margin = new Padding(10); // Marge autour de la TextBox
 
-            this.Controls.Add(txtSelectedUserId);
+            flpMain.Controls.Add(txtSelectedUserId);
 
-            // Création du TableLayoutPanel
+            // Création du TableLayoutPanel pour les utilisateurs
             tblUsers = new TableLayoutPanel();
-            tblUsers.AutoSize = true;
-            tblUsers.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tblUsers.AutoSize = false; // Désactive l'auto-redimensionnement
+            tblUsers.Dock = DockStyle.Fill; // Permet à la table de s'étendre correctement
             tblUsers.ColumnCount = 2;
             tblUsers.RowCount = 0;
-            tblUsers.Padding = new Padding(10);
             tblUsers.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            tblUsers.Padding = new Padding(10); // Marges internes réduites
+            tblUsers.Margin = new Padding(5); // Marges autour du TableLayoutPanel
+            tblUsers.AutoScroll = true;
 
-            // Ajout des utilisateurs
+            // Liste des utilisateurs
             List<Users> utilisateurs = Users.GetAll();
-            int maxWidthLabel = 0;
-            int maxWidthButton = 0;
-
             foreach (var utilisateur in utilisateurs)
             {
                 Label lblUser = new Label();
                 lblUser.Text = utilisateur.Prenom + " " + utilisateur.Nom;
-                lblUser.AutoSize = true;
-                lblUser.Padding = new Padding(5);
-                lblUser.TextAlign = ContentAlignment.MiddleLeft;
 
                 Button btnShowUserInfo = new Button();
                 btnShowUserInfo.Text = "Afficher infos";
@@ -60,63 +78,101 @@ namespace BiblioTech
                 btnShowUserInfo.Padding = new Padding(5);
                 btnShowUserInfo.Click += (s, ev) =>
                 {
-                    // Mettre à jour le texte de la TextBox avec des informations
                     txtSelectedUserId.Text = "Infos de l'utilisateur" + Environment.NewLine +
-                    Environment.NewLine + "- ID : " + utilisateur.Id.ToString() + Environment.NewLine +
-                    Environment.NewLine + "- Prénom : " + utilisateur.Prenom + Environment.NewLine +
-                    Environment.NewLine + "- Nom : " + utilisateur.Nom + Environment.NewLine +
-                    Environment.NewLine + "- Num. de téléphone : " + utilisateur.Telephone.ToString() + Environment.NewLine +
-                    Environment.NewLine + "- Adresse postale : " + utilisateur.AdressePostale + Environment.NewLine +
-                    Environment.NewLine + "- Courriel : " + utilisateur.AdresseEmail;
+                    "\r\n- ID : " + utilisateur.Id +
+                    "\r\n- Prénom : " + utilisateur.Prenom +
+                    "\r\n- Nom : " + utilisateur.Nom +
+                    "\r\n- Num. de téléphone : " + utilisateur.Telephone +
+                    "\r\n- Adresse postale : " + utilisateur.AdressePostale +
+                    "\r\n- Courriel : " + utilisateur.AdresseEmail;
                 };
 
+                // Ajouter l'utilisateur dans le TableLayoutPanel
                 int rowIndex = tblUsers.RowCount;
                 tblUsers.RowCount++;
                 tblUsers.Controls.Add(lblUser, 0, rowIndex);
                 tblUsers.Controls.Add(btnShowUserInfo, 1, rowIndex);
-
-                maxWidthLabel = Math.Max(maxWidthLabel, lblUser.Width);
-                maxWidthButton = Math.Max(maxWidthButton, btnShowUserInfo.PreferredSize.Width);
             }
 
-            // Définition des largeurs des colonnes
-            tblUsers.ColumnStyles.Clear();
-            tblUsers.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, maxWidthLabel + 20));
-            tblUsers.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, maxWidthButton + 20));
+            // Limiter la largeur du TableLayoutPanel des utilisateurs pour laisser de l'espace pour le formulaire d'ajout
+            int tblWidth = (int)(this.ClientSize.Width * 0.33) - (2 * paddingMargin);
+            tblUsers.Width = tblWidth;
 
-            // Ajout du TableLayoutPanel au FlowLayoutPanel
-            flnpnlUsers.Controls.Clear();
-            flnpnlUsers.Controls.Add(tblUsers);
+            // Ajouter le TableLayoutPanel directement au FlowLayoutPanel
+            flpMain.Controls.Add(tblUsers);
 
-            // Ajustement des tailles et positions
-            AdjustLayout();
+            // Création du panneau du formulaire utilisateur
+            Panel pnlAddUser = new Panel();
+            pnlAddUser.Width = 300;
+            pnlAddUser.Height = this.ClientSize.Height - 50;
+            pnlAddUser.Margin = new Padding(10);
+            pnlAddUser.AutoScroll = true;
+            pnlAddUser.AutoSize = true;
+            pnlAddUser.Padding = new Padding(5);
 
-            this.Resize += new EventHandler(frmUsersDashboard_Resize);
-        }
+            Label lblNom = new Label() { Text = "Nom:", Left = 10, Top = 20 };
+            TextBox txtNom = new TextBox() { Left = 120, Top = 20, Width = 200 };
 
-        private void frmUsersDashboard_Resize(object sender, EventArgs e)
-        {
-            AdjustLayout();
-        }
+            Label lblPrenom = new Label() { Text = "Prénom:", Left = 10, Top = 50 };
+            TextBox txtPrenom = new TextBox() { Left = 120, Top = 50, Width = 200 };
 
-        private void AdjustLayout()
-        {
-            int marginBottom = 40; // Marge du bas
+            Label lblTelephone = new Label() { Text = "Téléphone:", Left = 10, Top = 80 };
+            TextBox txtTelephone = new TextBox() { Left = 120, Top = 80, Width = 200 };
 
-            // Ajuster la largeur de la TextBox (prend 30% de la largeur de la fenêtre)
-            txtSelectedUserId.Width = (int)(this.ClientSize.Width * 0.3);
-            txtSelectedUserId.Height = this.ClientSize.Height - marginBottom;
+            Label lblAdresse = new Label() { Text = "Adresse Postale:", Left = 10, Top = 110 };
+            TextBox txtAdresse = new TextBox() { Left = 120, Top = 110, Width = 200 };
 
-            // Positionner la liste après la TextBox avec un espacement
-            flnpnlUsers.Left = txtSelectedUserId.Right + spacing;
-            flnpnlUsers.Width = tblUsers.PreferredSize.Width + 20;
-            flnpnlUsers.Height = this.ClientSize.Height - flnpnlUsers.Top - marginBottom;
+            Label lblEmail = new Label() { Text = "Adresse Email:", Left = 10, Top = 140 };
+            TextBox txtEmail = new TextBox() { Left = 120, Top = 140, Width = 200 };
 
-            // Empêcher la liste de dépasser la fenêtre
-            if (flnpnlUsers.Right > this.ClientSize.Width)
+            Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 180 };
+            btnSubmit.Click += (sender, e) =>
             {
-                flnpnlUsers.Width = this.ClientSize.Width - flnpnlUsers.Left - 10;
-            }
+                // Récupérer les informations des champs de texte
+                string nom = txtNom.Text;
+                string prenom = txtPrenom.Text;
+                string telephone = txtTelephone.Text;
+                string adresse = txtAdresse.Text;
+                string email = txtEmail.Text;
+
+                // Requête d'insertion dans la base de données
+                string query = "INSERT INTO utilisateurs (nom, prenom, telephone, adresse_postale, adresse_email) VALUES (@Nom, @Prenom, @Telephone, @Adresse, @Email)";
+
+                // Créer et préparer la commande SQL
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Nom", nom);
+                cmd.Parameters.AddWithValue("@Prenom", prenom);
+                cmd.Parameters.AddWithValue("@Telephone", telephone);
+                cmd.Parameters.AddWithValue("@Adresse", adresse);
+                cmd.Parameters.AddWithValue("@Email", email);
+
+                // Exécution de la commande d'insertion
+                cmd.ExecuteNonQuery();
+
+                // Message de confirmation
+                MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
+            };
+
+            pnlAddUser.Controls.Add(lblNom);
+            pnlAddUser.Controls.Add(txtNom);
+            pnlAddUser.Controls.Add(lblPrenom);
+            pnlAddUser.Controls.Add(txtPrenom);
+            pnlAddUser.Controls.Add(lblTelephone);
+            pnlAddUser.Controls.Add(txtTelephone);
+            pnlAddUser.Controls.Add(lblAdresse);
+            pnlAddUser.Controls.Add(txtAdresse);
+            pnlAddUser.Controls.Add(lblEmail);
+            pnlAddUser.Controls.Add(txtEmail);
+            pnlAddUser.Controls.Add(btnSubmit);
+
+            flpMain.Controls.Add(pnlAddUser);
+        }
+
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            frmChoiceMenu frmChoiceMenu = new frmChoiceMenu();
+            frmChoiceMenu.Show();
+            frmChoiceMenu.Closed += (s, args) => this.Close();
         }
     }
 }

@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             mySqlCommandBuilder1 = new MySqlConnector.MySqlCommandBuilder();
-            flnpnlUsers = new FlowLayoutPanel();
             SuspendLayout();
             // 
             // mySqlCommandBuilder1
@@ -38,20 +37,11 @@
             mySqlCommandBuilder1.QuotePrefix = "`";
             mySqlCommandBuilder1.QuoteSuffix = "`";
             // 
-            // flnpnlUsers
-            // 
-            flnpnlUsers.AutoScroll = true;
-            flnpnlUsers.Location = new Point(1034, 26);
-            flnpnlUsers.Name = "flnpnlUsers";
-            flnpnlUsers.Size = new Size(200, 100);
-            flnpnlUsers.TabIndex = 0;
-            // 
             // frmUsersDashboard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1578, 718);
-            Controls.Add(flnpnlUsers);
             Name = "frmUsersDashboard";
             Text = "UsersDashboard";
             Load += frmUsersDashboard_Load;
@@ -60,6 +50,5 @@
 
         #endregion
         private MySqlConnector.MySqlCommandBuilder mySqlCommandBuilder1;
-        private FlowLayoutPanel flnpnlUsers;
     }
 }

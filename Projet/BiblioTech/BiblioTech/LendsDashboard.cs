@@ -142,7 +142,7 @@ namespace BiblioTech
         {
             frmChoiceMenu frmChoiceMenu = new frmChoiceMenu();
             frmChoiceMenu.Show();
-            this.Hide();
+            frmChoiceMenu.Closed += (s, args) => this.Close();
         }
     }
 }
