@@ -103,12 +103,10 @@ namespace BiblioTech
 
             // Création du panneau du formulaire utilisateur
             Panel pnlAddUser = new Panel();
-            pnlAddUser.Width = 300;
-            pnlAddUser.Height = this.ClientSize.Height - 50;
-            pnlAddUser.Margin = new Padding(10);
+            pnlAddUser.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin); // Redimensionnement
+            pnlAddUser.Height = flpMain.Height - (4 * paddingMargin);
             pnlAddUser.AutoScroll = true;
-            pnlAddUser.AutoSize = true;
-            pnlAddUser.Padding = new Padding(5);
+            pnlAddUser.BorderStyle = BorderStyle.FixedSingle;
 
             Label lblNom = new Label() { Text = "Nom:", Left = 10, Top = 20 };
             TextBox txtNom = new TextBox() { Left = 120, Top = 20, Width = 200 };
