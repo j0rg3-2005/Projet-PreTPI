@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-
+﻿using MySqlConnector;
 namespace BiblioTech
 {
     public partial class frmLendsDashboard : Form
@@ -10,13 +6,11 @@ namespace BiblioTech
         TextBox txtSelectedLendId;
         TableLayoutPanel tblLends;
         CheckBox chkLateOnly;
+        FlowLayoutPanel flpMain;
         Button btnBack;
-        int spacing = 20;
-        int paddingMargin = 20;
+        int paddingMargin = 15;
         List<Lends> allLends;
         List<Lends> lateLends;
-        List<Books> books;
-        List<Users> users;
 
         public frmLendsDashboard()
         {
@@ -25,6 +19,7 @@ namespace BiblioTech
 
         private void frmLendsDashboard_Load(object sender, EventArgs e)
         {
+            PreloadData();
             this.WindowState = FormWindowState.Maximized;
             this.Padding = new Padding(paddingMargin);
 
@@ -41,43 +36,107 @@ namespace BiblioTech
             chkLateOnly.AutoSize = true;
             chkLateOnly.Location = new Point(btnBack.Right + 20, paddingMargin);
             chkLateOnly.CheckedChanged += (s, ev) => LoadLends();
+            chkLateOnly.Top = paddingMargin;
             this.Controls.Add(chkLateOnly);
+
+            flpMain = new FlowLayoutPanel();
+            flpMain.Dock = DockStyle.Fill;
+            flpMain.FlowDirection = FlowDirection.LeftToRight;
+            flpMain.Padding = new Padding(paddingMargin);
+            flpMain.Margin = new Padding(paddingMargin);
+            flpMain.BorderStyle = BorderStyle.FixedSingle;
+            flpMain.AutoScroll = true;
+            this.Controls.Add(flpMain);
 
             txtSelectedLendId = new TextBox();
             txtSelectedLendId.ReadOnly = true;
             txtSelectedLendId.Multiline = true;
             txtSelectedLendId.WordWrap = true;
             txtSelectedLendId.ScrollBars = ScrollBars.Vertical;
-            txtSelectedLendId.Width = (int)(this.ClientSize.Width * 0.3) - (2 * paddingMargin);
-            txtSelectedLendId.Height = this.ClientSize.Height - 50 - (2 * paddingMargin);
-            txtSelectedLendId.Location = new Point(paddingMargin, btnBack.Bottom + 10);
-            this.Controls.Add(txtSelectedLendId);
+            txtSelectedLendId.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
+            txtSelectedLendId.Height = flpMain.Height - (4 * paddingMargin);
+            flpMain.Controls.Add(txtSelectedLendId);
 
             tblLends = new TableLayoutPanel();
-            tblLends.AutoSize = true;
-            tblLends.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tblLends.ColumnCount = 6;
-            tblLends.RowCount = 0;
-            tblLends.Padding = new Padding(10);
+            tblLends.Dock = DockStyle.Fill;
             tblLends.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
+            tblLends.Width = (int)(flpMain.Width * 0.5) - (2 * paddingMargin);
+            tblLends.Height = flpMain.Height - (4 * paddingMargin);
+            tblLends.RowCount = 0;
+            tblLends.AutoScroll = true;
 
-            flnpnlLends.AutoScroll = true;
-            flnpnlLends.Location = new Point(txtSelectedLendId.Right + spacing, txtSelectedLendId.Top);
-            flnpnlLends.Width = this.ClientSize.Width - txtSelectedLendId.Width - (3 * paddingMargin);
-            flnpnlLends.Controls.Add(tblLends);
+            Panel pnlCreateLend = new Panel();
+            pnlCreateLend.Width = (int)(flpMain.Width * 0.2) - (2 * paddingMargin);
+            pnlCreateLend.Height = flpMain.Height - (4 * paddingMargin);
+            pnlCreateLend.AutoScroll = true;
+            pnlCreateLend.BorderStyle = BorderStyle.FixedSingle;
 
-            PreloadData();
+            CreateLendFormControls(pnlCreateLend);
+            flpMain.Controls.Add(pnlCreateLend);
+
             LoadLends();
-            AdjustLayout();
+        }
 
-            this.Resize += new EventHandler(frmLendsDashboard_Resize);
+
+        private void CreateLendFormControls(Panel pnlCreateLend)
+        {
+            Label lblTitre = new Label() { Text = "Titre:", Left = 10, Top = 20 };
+            lblTitre.BorderStyle = BorderStyle.FixedSingle;
+            lblTitre.AutoSize = true;
+            TextBox txtTitre = new TextBox() { Left = 120, Top = 20, Width = 200 };
+
+            Label lblAuteur = new Label() { Text = "Auteur:", Left = 10, Top = 50 };
+            lblAuteur.BorderStyle = BorderStyle.FixedSingle;
+            TextBox txtAuteur = new TextBox() { Left = 120, Top = 50, Width = 200 };
+
+            Label lblGenre = new Label() { Text = "Genre:", Left = 10, Top = 80 };
+            lblGenre.BorderStyle = BorderStyle.FixedSingle;
+            TextBox txtGenre = new TextBox() { Left = 120, Top = 80, Width = 200 };
+
+            Label lblDatePublication = new Label() { Text = "Date de Publication:", Left = 10, Top = 110 };
+            lblDatePublication.BorderStyle = BorderStyle.FixedSingle;
+
+            TextBox txtDatePublication = new TextBox() { Left = 120, Top = 110, Width = 200 };
+
+            Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 150 };
+            btnSubmit.Click += (sender, e) =>
+            {
+                string titre = txtTitre.Text;
+                string auteur = txtAuteur.Text;
+                string genre = txtGenre.Text;
+                string datePublication = txtDatePublication.Text;
+
+                string query = "INSERT INTO livres (titre, auteur, genre, date_publication,etat ) VALUES (@Titre, @Auteur, @Genre, @DatePublication, True)";
+
+                MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+                cmd.Parameters.AddWithValue("@Titre", titre);
+                cmd.Parameters.AddWithValue("@Auteur", auteur);
+                cmd.Parameters.AddWithValue("@Genre", genre);
+                cmd.Parameters.AddWithValue("@DatePublication", DateTime.Parse(datePublication));
+
+                cmd.ExecuteNonQuery();
+
+                MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
+
+                frmBooksDashboard frmBooksDashboard = new frmBooksDashboard();
+                frmBooksDashboard.Show();
+                frmBooksDashboard.Closed += (s, args) => this.Close();
+            };
+
+            pnlCreateLend.Controls.Add(lblTitre);
+            pnlCreateLend.Controls.Add(txtTitre);
+            pnlCreateLend.Controls.Add(lblAuteur);
+            pnlCreateLend.Controls.Add(txtAuteur);
+            pnlCreateLend.Controls.Add(lblGenre);
+            pnlCreateLend.Controls.Add(txtGenre);
+            pnlCreateLend.Controls.Add(lblDatePublication);
+            pnlCreateLend.Controls.Add(txtDatePublication);
+            pnlCreateLend.Controls.Add(btnSubmit);
         }
 
         private void PreloadData()
         {
             allLends = Lends.GetAll();
-            books = Books.GetAll();
-            users = Users.GetAll();
             lateLends = allLends.FindAll(l => l.DateFin < DateTime.Now && l.Etat == "Non retourné");
         }
 
@@ -87,8 +146,6 @@ namespace BiblioTech
             tblLends.RowCount = 0;
 
             List<Lends> lendsToDisplay = chkLateOnly.Checked ? lateLends : allLends;
-            int maxWidthLabel = 0;
-            int maxWidthButton = 0;
 
             foreach (var lend in lendsToDisplay)
             {
@@ -96,38 +153,31 @@ namespace BiblioTech
                 lblLendId.Text = lend.Id.ToString();
                 lblLendId.AutoSize = true;
                 lblLendId.Padding = new Padding(5);
-                lblLendId.TextAlign = ContentAlignment.MiddleLeft;
-                lblLendId.BorderStyle = BorderStyle.FixedSingle;
 
                 Label lblUser = new Label();
-                lblUser.Text = users[lend.IdUtilisateur].Nom + " " + users[lend.IdUtilisateur].Prenom;
+                lblUser.Text = lend.PrenomUtilisateur + " " + lend.NomUtilisateur;
                 lblUser.AutoSize = true;
                 lblUser.Padding = new Padding(5);
-                lblUser.TextAlign = ContentAlignment.MiddleLeft;
 
                 Label lblBook = new Label();
-                lblBook.Text = books[lend.IdLivre].Titre;
+                lblBook.Text = lend.TitreLivre;
                 lblBook.AutoSize = true;
                 lblBook.Padding = new Padding(5);
-                lblBook.TextAlign = ContentAlignment.MiddleLeft;
 
                 Label lblStartDate = new Label();
                 lblStartDate.Text = lend.DateDebut.ToString();
                 lblStartDate.AutoSize = true;
                 lblStartDate.Padding = new Padding(5);
-                lblStartDate.TextAlign = ContentAlignment.MiddleLeft;
 
                 Label lblEndDate = new Label();
                 lblEndDate.Text = lend.DateFin.ToString();
                 lblEndDate.AutoSize = true;
                 lblEndDate.Padding = new Padding(5);
-                lblEndDate.TextAlign = ContentAlignment.MiddleLeft;
 
                 Label lblState = new Label();
-                lblEndDate.Text = lend.Etat;
-                lblEndDate.AutoSize = true;
-                lblEndDate.Padding = new Padding(5);
-                lblEndDate.TextAlign = ContentAlignment.MiddleLeft;
+                lblState.Text = lend.Etat;
+                lblState.AutoSize = true;
+                lblState.Padding = new Padding(5);
 
                 Button btnShowBookInfo = new Button();
                 btnShowBookInfo.Text = "Afficher infos";
@@ -137,12 +187,11 @@ namespace BiblioTech
                 {
                     txtSelectedLendId.Text = "INFOS DU LIVRE" +
                     "\r\n\r\n- ID : " + lend.Id.ToString()
-                    + "\r\n\r\n- Livre emprunté : " + books[lend.IdLivre].Titre
-                    + "\r\n\r\n- Utilisateur : " + users[lend.IdUtilisateur].Prenom + " " + users[lend.IdUtilisateur].Nom
+                    + "\r\n\r\n- Livre emprunté : " + lend.TitreLivre
+                    + "\r\n\r\n- Utilisateur : " + lend.PrenomUtilisateur
                     + "\r\n\r\n- Date de début : " + lend.DateDebut
                     + "\r\n\r\n- Date de fin : " + lend.DateFin
                     + "\r\n\r\n- Etat : " + lend.Etat;
-
                 };
 
                 int rowIndex = tblLends.RowCount;
@@ -153,35 +202,10 @@ namespace BiblioTech
                 tblLends.Controls.Add(lblStartDate, 3, rowIndex);
                 tblLends.Controls.Add(lblEndDate, 4, rowIndex);
                 tblLends.Controls.Add(btnShowBookInfo, 5, rowIndex);
-
-                maxWidthLabel = Math.Max(maxWidthLabel, lblBook.Width);
-                maxWidthButton = Math.Max(maxWidthButton, btnShowBookInfo.PreferredSize.Width);
             }
-
-            tblLends.ColumnStyles.Clear();
-            tblLends.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, maxWidthLabel + 20));
-            tblLends.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, maxWidthButton + 20));
+            flpMain.Controls.Add(tblLends);
         }
 
-        private void frmLendsDashboard_Resize(object sender, EventArgs e)
-        {
-            AdjustLayout();
-        }
-
-        private void AdjustLayout()
-        {
-            int marginBottom = 40;
-            txtSelectedLendId.Width = (int)(this.ClientSize.Width * 0.3) - (2 * paddingMargin);
-            txtSelectedLendId.Height = this.ClientSize.Height - marginBottom - (2 * paddingMargin);
-            flnpnlLends.Left = txtSelectedLendId.Right + spacing;
-            flnpnlLends.Top = txtSelectedLendId.Top;
-            flnpnlLends.Width = this.ClientSize.Width - flnpnlLends.Left - paddingMargin;
-            flnpnlLends.Height = this.ClientSize.Height - flnpnlLends.Top - marginBottom;
-            if (flnpnlLends.Right > this.ClientSize.Width)
-            {
-                flnpnlLends.Width = this.ClientSize.Width - flnpnlLends.Left - paddingMargin;
-            }
-        }
 
         private void btnBack_Click(object sender, EventArgs e)
         {

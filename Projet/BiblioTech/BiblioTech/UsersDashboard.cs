@@ -11,8 +11,7 @@ namespace BiblioTech
         TextBox txtSelectedUserId;
         TableLayoutPanel tblUsers;
         FlowLayoutPanel flpMain;
-        Button btnBack; // Bouton de retour
-        int spacing = 10;
+        Button btnBack;
         int paddingMargin = 15;
 
         public frmUsersDashboard()
@@ -25,19 +24,17 @@ namespace BiblioTech
             this.WindowState = FormWindowState.Maximized;
             this.Padding = new Padding(paddingMargin);
 
-            // Création du bouton de retour en haut à gauche
             btnBack = new Button();
             btnBack.Text = "Retour";
             btnBack.AutoSize = true;
             btnBack.Padding = new Padding(5);
             btnBack.Click += btnBack_Click;
-            btnBack.Location = new Point(paddingMargin, paddingMargin); // Positionné en haut à gauche
+            btnBack.Location = new Point(paddingMargin, paddingMargin);
             this.Controls.Add(btnBack);
 
-            // Création du FlowLayoutPanel principal
             flpMain = new FlowLayoutPanel();
             flpMain.Dock = DockStyle.Fill;
-            flpMain.FlowDirection = FlowDirection.LeftToRight; // Modification pour un flux horizontal
+            flpMain.FlowDirection = FlowDirection.LeftToRight;
             flpMain.AutoScroll = true;
             flpMain.Padding = new Padding(paddingMargin);
             this.Controls.Add(flpMain);
@@ -48,24 +45,22 @@ namespace BiblioTech
             txtSelectedUserId.Multiline = true;
             txtSelectedUserId.WordWrap = true;
             txtSelectedUserId.ScrollBars = ScrollBars.Vertical;
-            txtSelectedUserId.Width = (int)(this.ClientSize.Width * 0.35) - (2 * paddingMargin); // Redimensionnement
-            txtSelectedUserId.Height = this.ClientSize.Height - 100 - (2 * paddingMargin); // Ajustement de la hauteur
-            txtSelectedUserId.Margin = new Padding(10); // Marge autour de la TextBox
+            txtSelectedUserId.Width = (int)(this.ClientSize.Width * 0.35) - (2 * paddingMargin);
+            txtSelectedUserId.Height = this.ClientSize.Height - 100 - (2 * paddingMargin);
+            txtSelectedUserId.Margin = new Padding(10);
 
             flpMain.Controls.Add(txtSelectedUserId);
 
-            // Création du TableLayoutPanel pour les utilisateurs
             tblUsers = new TableLayoutPanel();
-            tblUsers.AutoSize = false; // Désactive l'auto-redimensionnement
-            tblUsers.Dock = DockStyle.Fill; // Permet à la table de s'étendre correctement
+            tblUsers.AutoSize = false;
+            tblUsers.Dock = DockStyle.Fill;
             tblUsers.ColumnCount = 2;
             tblUsers.RowCount = 0;
             tblUsers.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
-            tblUsers.Padding = new Padding(10); // Marges internes réduites
-            tblUsers.Margin = new Padding(5); // Marges autour du TableLayoutPanel
+            tblUsers.Padding = new Padding(10);
+            tblUsers.Margin = new Padding(5);
             tblUsers.AutoScroll = true;
 
-            // Liste des utilisateurs
             List<Users> utilisateurs = Users.GetAll();
             foreach (var utilisateur in utilisateurs)
             {
@@ -87,23 +82,19 @@ namespace BiblioTech
                     "\r\n- Courriel : " + utilisateur.AdresseEmail;
                 };
 
-                // Ajouter l'utilisateur dans le TableLayoutPanel
                 int rowIndex = tblUsers.RowCount;
                 tblUsers.RowCount++;
                 tblUsers.Controls.Add(lblUser, 0, rowIndex);
                 tblUsers.Controls.Add(btnShowUserInfo, 1, rowIndex);
             }
 
-            // Limiter la largeur du TableLayoutPanel des utilisateurs pour laisser de l'espace pour le formulaire d'ajout
             int tblWidth = (int)(this.ClientSize.Width * 0.33) - (2 * paddingMargin);
             tblUsers.Width = tblWidth;
 
-            // Ajouter le TableLayoutPanel directement au FlowLayoutPanel
             flpMain.Controls.Add(tblUsers);
 
-            // Création du panneau du formulaire utilisateur
             Panel pnlAddUser = new Panel();
-            pnlAddUser.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin); // Redimensionnement
+            pnlAddUser.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
             pnlAddUser.Height = flpMain.Height - (4 * paddingMargin);
             pnlAddUser.AutoScroll = true;
             pnlAddUser.BorderStyle = BorderStyle.FixedSingle;
@@ -126,17 +117,14 @@ namespace BiblioTech
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 180 };
             btnSubmit.Click += (sender, e) =>
             {
-                // Récupérer les informations des champs de texte
                 string nom = txtNom.Text;
                 string prenom = txtPrenom.Text;
                 string telephone = txtTelephone.Text;
                 string adresse = txtAdresse.Text;
                 string email = txtEmail.Text;
 
-                // Requête d'insertion dans la base de données
                 string query = "INSERT INTO utilisateurs (nom, prenom, telephone, adresse_postale, adresse_email) VALUES (@Nom, @Prenom, @Telephone, @Adresse, @Email)";
 
-                // Créer et préparer la commande SQL
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
                 cmd.Parameters.AddWithValue("@Nom", nom);
                 cmd.Parameters.AddWithValue("@Prenom", prenom);
@@ -144,10 +132,8 @@ namespace BiblioTech
                 cmd.Parameters.AddWithValue("@Adresse", adresse);
                 cmd.Parameters.AddWithValue("@Email", email);
 
-                // Exécution de la commande d'insertion
                 cmd.ExecuteNonQuery();
 
-                // Message de confirmation
                 MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
             };
 
