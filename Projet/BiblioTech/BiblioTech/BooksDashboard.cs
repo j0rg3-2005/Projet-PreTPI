@@ -138,58 +138,97 @@ namespace BiblioTech
         private void AddBookFormControls(Panel pnlAddBook)
         {
             Label lblTitre = new Label() { Text = "Titre:", Left = 10, Top = 20 };
-            lblTitre.BorderStyle = BorderStyle.FixedSingle;
             lblTitre.AutoSize = true;
-            TextBox txtTitre = new TextBox() { Left = 120, Top = 20, Width = 200 };
+            TextBox txtTitle = new TextBox() { Left = lblTitre.Width + 50, Top = 20, Width = 200 };
 
             Label lblAuteur = new Label() { Text = "Auteur:", Left = 10, Top = 50 };
-            lblAuteur.BorderStyle = BorderStyle.FixedSingle;
-            TextBox txtAuteur = new TextBox() { Left = 120, Top = 50, Width = 200 };
+            lblAuteur.AutoSize = true;
+            TextBox txtAuthor = new TextBox() { Left = lblAuteur.Width + 50, Top = 50, Width = 200 };
 
             Label lblGenre = new Label() { Text = "Genre:", Left = 10, Top = 80 };
-            lblGenre.BorderStyle = BorderStyle.FixedSingle;
-            TextBox txtGenre = new TextBox() { Left = 120, Top = 80, Width = 200 };
+            lblGenre.AutoSize = true;
+            TextBox txtGenre = new TextBox() { Left = lblGenre.Width + 50, Top = 80, Width = 200 };
 
-            Label lblDatePublication = new Label() { Text = "Date de Publication:", Left = 10, Top = 110 };
-            lblDatePublication.BorderStyle = BorderStyle.FixedSingle;
+            Label lblPublicationDate = new Label() { Text = "Date de Publication:", Left = 10, Top = 110 };
+            lblPublicationDate.AutoSize = true;
+            DateTimePicker dtpPublicationDate = new DateTimePicker() { Left = lblPublicationDate.Width + 50, Top = 110, Width = 200, Format = DateTimePickerFormat.Short };
 
-            TextBox txtDatePublication = new TextBox() { Left = 120, Top = 110, Width = 200 };
+            // Limiter la date de publication à la date actuelle ou dans le passé
+            dtpPublicationDate.MaxDate = DateTime.Now;
+
+            // Validation lorsque la date change
+            dtpPublicationDate.ValueChanged += (sender, e) =>
+            {
+                if (dtpPublicationDate.Value > DateTime.Now)
+                {
+                    MessageBox.Show("La date de publication ne peut pas être dans le futur.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    dtpPublicationDate.Value = DateTime.Now;  // Réinitialiser la date à la date actuelle
+                }
+            };
 
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 150 };
             btnSubmit.Click += (sender, e) =>
             {
-                string titre = txtTitre.Text;
-                string auteur = txtAuteur.Text;
-                string genre = txtGenre.Text;
-                string datePublication = txtDatePublication.Text;
+                string titre = txtTitle.Text.Trim();
+                string auteur = txtAuthor.Text.Trim();
+                string genre = txtGenre.Text.Trim();
+                DateTime datePublication = dtpPublicationDate.Value;
 
-                string query = "INSERT INTO livres (titre, auteur, genre, date_publication,etat ) VALUES (@Titre, @Auteur, @Genre, @DatePublication, True)";
+                // Vérifier que tous les champs sont remplis
+                if (string.IsNullOrEmpty(titre) || string.IsNullOrEmpty(auteur) || string.IsNullOrEmpty(genre))
+                {
+                    // Afficher un message si un champ est vide
+                    MessageBox.Show("Veuillez remplir tous les champs du formulaire avant de soumettre.",
+                                    "Champs manquants",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+                    return; // Ne pas envoyer la requête si un champ est vide
+                }
+
+                // Si tous les champs sont remplis, on procède à l'insertion dans la base de données
+                string query = "INSERT INTO livres (titre, auteur, genre, date_publication, etat) " +
+                               "VALUES (@Titre, @Auteur, @Genre, @DatePublication, True)";
 
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
                 cmd.Parameters.AddWithValue("@Titre", titre);
                 cmd.Parameters.AddWithValue("@Auteur", auteur);
                 cmd.Parameters.AddWithValue("@Genre", genre);
-                cmd.Parameters.AddWithValue("@DatePublication", DateTime.Parse(datePublication));
+                cmd.Parameters.AddWithValue("@DatePublication", datePublication);
 
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.ExecuteNonQuery(); // Exécuter la requête d'insertion
+                    MessageBox.Show("Les informations ont été enregistrées dans la base de données.",
+                                    "Succès",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
 
-                MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
-
-                frmBooksDashboard frmBooksDashboard = new frmBooksDashboard();
-                frmBooksDashboard.Show();
-                frmBooksDashboard.Closed += (s, args) => this.Close();
+                    // Réinitialiser ou fermer le formulaire après la soumission
+                    frmBooksDashboard frmBooksDashboard = new frmBooksDashboard();
+                    frmBooksDashboard.Show();
+                    frmBooksDashboard.Closed += (s, args) => this.Close();
+                }
+                catch (Exception ex)
+                {
+                    // Gérer l'exception si la requête échoue
+                    MessageBox.Show("Une erreur s'est produite lors de l'enregistrement des données. " + ex.Message,
+                                    "Erreur",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                }
             };
 
             pnlAddBook.Controls.Add(lblTitre);
-            pnlAddBook.Controls.Add(txtTitre);
+            pnlAddBook.Controls.Add(txtTitle);
             pnlAddBook.Controls.Add(lblAuteur);
-            pnlAddBook.Controls.Add(txtAuteur);
+            pnlAddBook.Controls.Add(txtAuthor);
             pnlAddBook.Controls.Add(lblGenre);
             pnlAddBook.Controls.Add(txtGenre);
-            pnlAddBook.Controls.Add(lblDatePublication);
-            pnlAddBook.Controls.Add(txtDatePublication);
+            pnlAddBook.Controls.Add(lblPublicationDate);
+            pnlAddBook.Controls.Add(dtpPublicationDate);
             pnlAddBook.Controls.Add(btnSubmit);
         }
+
 
         private void BtnSearch_Click(object sender, EventArgs e)
         {

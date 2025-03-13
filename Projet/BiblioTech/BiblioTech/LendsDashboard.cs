@@ -10,6 +10,7 @@ namespace BiblioTech
         TableLayoutPanel tblLends;
         CheckBox chkLateOnly;
         FlowLayoutPanel flpMain;
+        FlowLayoutPanel flpUserId;
         Panel pnlCreateLend;
         Button btnBack;
         int paddingMargin = 15;
@@ -49,7 +50,12 @@ namespace BiblioTech
             flpMain.Padding = new Padding(paddingMargin, paddingMargin * 2, paddingMargin, paddingMargin);
             flpMain.Margin = new Padding(paddingMargin);
             flpMain.AutoScroll = true;
+            flpMain.BorderStyle = BorderStyle.FixedSingle;
             this.Controls.Add(flpMain);
+
+            flpUserId = new FlowLayoutPanel();
+            flpUserId.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
+            flpUserId.Height =flpMain.Height - (4 * paddingMargin);
 
             txtSelectedLendId = new TextBox();
             txtSelectedLendId.Text = "Veuillez sélectionner un livre afin d'afficher les informations.";
@@ -57,30 +63,30 @@ namespace BiblioTech
             txtSelectedLendId.Multiline = true;
             txtSelectedLendId.WordWrap = true;
             txtSelectedLendId.ScrollBars = ScrollBars.Vertical;
-            txtSelectedLendId.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
+            txtSelectedLendId.Width = (int)(flpMain.Width * 0.3) - (4 * paddingMargin);
             txtSelectedLendId.Height = (int)(flpMain.Height * 0.5) - (4 * paddingMargin);
+            flpUserId.Controls.Add(txtSelectedLendId);
+
 
             btnCloseLend = new Button();
             btnCloseLend.Text = "Fermer le prêt";
             btnCloseLend.AutoSize = true;
-            btnCloseLend.Margin = new Padding(5);
-            btnCloseLend.Anchor = AnchorStyles.Left;
+            btnCloseLend.Location = new Point(txtSelectedLendId.Left, txtSelectedLendId.Bottom + 10);
+            btnCloseLend.Enabled = false;
+            flpUserId.Controls.Add(btnCloseLend);
 
             btnReportStolen = new Button();
             btnReportStolen.Text = "Déclarer le livre volé";
             btnReportStolen.AutoSize = true;
-            btnReportStolen.Margin = new Padding(5);
-            btnReportStolen.Anchor = AnchorStyles.Left;
+            btnReportStolen.Enabled = false;
+            flpUserId.Controls.Add(btnReportStolen);
 
-            // Ajouter les boutons à flpMain
-            flpMain.Controls.Add(txtSelectedLendId);
-            flpMain.Controls.Add(btnCloseLend);
-            flpMain.Controls.Add(btnReportStolen);
+            flpMain.Controls.Add(flpUserId);
 
             tblLends = new TableLayoutPanel();
             tblLends.Dock = DockStyle.Fill;
             tblLends.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
-            tblLends.Width = (int)(flpMain.Width * 0.2) - (2 * paddingMargin);
+            tblLends.Width = (int)(flpMain.Width * 0.5) - (2 * paddingMargin);
             tblLends.Height = flpMain.Height - (4 * paddingMargin);
             tblLends.RowCount = 0;
             tblLends.AutoScroll = true;
@@ -95,6 +101,7 @@ namespace BiblioTech
 
             CreateLendFormControls(pnlCreateLend);
             flpMain.Controls.Add(pnlCreateLend);
+
         }
         private void LoadLends()
         {
@@ -151,69 +158,58 @@ namespace BiblioTech
                     + "\r\n\r\n- Etat : " + lend.Etat;
                     if(lend.Etat == "Non retourné")
                     {
-                        CreateActionButtons(lend);
+                        btnCloseLend.Enabled = true;
+                        btnReportStolen.Enabled = true;
+                        btnCloseLend.Click += (s, ev) =>
+                        {
+                            string updateQuery = "UPDATE emprunts SET Etat = 'Retourné' WHERE id = @LendId";
+                            MySqlCommand cmd = new MySqlCommand(updateQuery, Program.conn);
+                            cmd.Parameters.AddWithValue("@LendId", lend.Id);
+                            cmd.ExecuteNonQuery();
+
+                            MessageBox.Show("Le prêt a été marqué comme retourné.");
+                            PreloadData();
+                            LoadLends();
+
+                            btnCloseLend.Enabled = false;
+                            btnReportStolen.Enabled = false;
+                        };
+
+                        btnReportStolen.Click += (s, ev) =>
+                        {
+                            // Delete the lend record (as the book is reported stolen)
+                            string deleteQuery = "DELETE FROM emprunts WHERE id = @LendId";
+                            MySqlCommand cmd = new MySqlCommand(deleteQuery, Program.conn);
+                            cmd.Parameters.AddWithValue("@LendId", lend.Id);
+                            cmd.ExecuteNonQuery();
+
+                            MessageBox.Show("Le livre a été déclaré volé et le prêt a été supprimé.");
+                            PreloadData();
+                            LoadLends();
+
+                            btnCloseLend.Enabled = false;
+                            btnReportStolen.Enabled = false;
+                        };
                     }
                 };
 
                 int rowIndex = tblLends.RowCount;
                 tblLends.RowCount++;
-                tblLends.Controls.Add(lblLendId, 0, rowIndex);
-                tblLends.Controls.Add(lblUser, 1, rowIndex);
-                tblLends.Controls.Add(lblBook, 2, rowIndex);
-                tblLends.Controls.Add(lblStartDate, 3, rowIndex);
-                tblLends.Controls.Add(lblEndDate, 4, rowIndex);
-                tblLends.Controls.Add(lblState, 5, rowIndex);
-                tblLends.Controls.Add(btnShowBookInfo, 6, rowIndex);
+                for (int i = 0; i <= 6; i++)
+                {
+                    tblLends.Controls.Add(lblLendId, i, rowIndex);
+                }
             }
 
             tblLends.RowCount++;
-            tblLends.Controls.Add(new Label(), 0, tblLends.RowCount);
-            tblLends.Controls.Add(new Label(), 1, tblLends.RowCount);
-            tblLends.Controls.Add(new Label(), 2, tblLends.RowCount);
-            tblLends.Controls.Add(new Label(), 3, tblLends.RowCount);
-            tblLends.Controls.Add(new Label(), 4, tblLends.RowCount);
-            tblLends.Controls.Add(new Label(), 5, tblLends.RowCount);
-            tblLends.Controls.Add(new Label(), 6, tblLends.RowCount);
+            for (int i = 0; i <= 6; i++)
+            {
+                tblLends.Controls.Add(new Label(), i, tblLends.RowCount);
+            }
 
-            flpMain.Controls.Add(txtSelectedLendId);
-            flpMain.Controls.Add(btnCloseLend);
-            flpMain.Controls.Add(btnReportStolen);
             flpMain.Controls.Add(tblLends);
             flpMain.Controls.Add(pnlCreateLend);
         }
-
-        private void CreateActionButtons(Lends lend)
-        {
-
-            btnCloseLend.Click += (s, ev) =>
-            {
-                // Mark the lend as returned
-                string updateQuery = "UPDATE emprunts SET etat = 'Retourné' WHERE id = @LendId";
-                MySqlCommand cmd = new MySqlCommand(updateQuery, Program.conn);
-                cmd.Parameters.AddWithValue("@LendId", lend.Id);
-                cmd.ExecuteNonQuery();
-
-                MessageBox.Show("Le prêt a été marqué comme retourné.");
-                LoadLends(); // Refresh the list
-            };
-
-            // Create and add "Déclarer volé" button
-
-            btnReportStolen.Click += (s, ev) =>
-            {
-                // Delete the lend record (as the book is reported stolen)
-                string deleteQuery = "DELETE FROM emprunts WHERE id = @LendId";
-                MySqlCommand cmd = new MySqlCommand(deleteQuery, Program.conn);
-                cmd.Parameters.AddWithValue("@LendId", lend.Id);
-                cmd.ExecuteNonQuery();
-
-                MessageBox.Show("Le livre a été déclaré volé et le prêt a été supprimé.");
-                LoadLends(); // Refresh the list
-            };
-        }
-
-
-        // Créez une classe pour associer l'ID à l'affichage du texte
         public class ComboBoxItem
         {
             public int Id { get; set; }
@@ -235,7 +231,6 @@ namespace BiblioTech
 
             // Create ComboBox for users
             Label lblUser = new Label() { Text = "User:", Left = 10, Top = 20 };
-            lblUser.BorderStyle = BorderStyle.FixedSingle;
             lblUser.AutoSize = true;
 
             ComboBox cmbUser = new ComboBox() { Left = 120, Top = 20, Width = 200 };
@@ -252,7 +247,6 @@ namespace BiblioTech
 
             // Create ComboBox for books
             Label lblBook = new Label() { Text = "Book Title:", Left = 10, Top = 50 };
-            lblBook.BorderStyle = BorderStyle.FixedSingle;
             lblBook.AutoSize = true;
 
             ComboBox cmbBook = new ComboBox() { Left = 120, Top = 50, Width = 200 };
@@ -269,14 +263,12 @@ namespace BiblioTech
 
             // Date fields (using DateTimePicker)
             Label lblStartDate = new Label() { Text = "Start Date:", Left = 10, Top = 80 };
-            lblStartDate.BorderStyle = BorderStyle.FixedSingle;
             lblStartDate.AutoSize = true;
             DateTimePicker dtpStartDate = new DateTimePicker() { Left = 120, Top = 80, Width = 200, Format = DateTimePickerFormat.Short };
             pnlCreateLend.Controls.Add(lblStartDate);
             pnlCreateLend.Controls.Add(dtpStartDate);
 
             Label lblEndDate = new Label() { Text = "End Date:", Left = 10, Top = 110 };
-            lblEndDate.BorderStyle = BorderStyle.FixedSingle;
             lblEndDate.AutoSize = true;
             DateTimePicker dtpEndDate = new DateTimePicker() { Left = 120, Top = 110, Width = 200, Format = DateTimePickerFormat.Short };
             pnlCreateLend.Controls.Add(lblEndDate);
@@ -300,22 +292,36 @@ namespace BiblioTech
                 }
             };
 
-
-            // Submit button
             Button btnSubmit = new Button() { Text = "Submit", Left = 120, Top = 150 };
             btnSubmit.Click += (sender, e) =>
             {
                 var selectedUser = cmbUser.SelectedItem as ComboBoxItem;
                 var selectedBook = cmbBook.SelectedItem as ComboBoxItem;
 
+                // Vérification des champs avant la soumission
+                if (selectedUser == null || selectedBook == null)
+                {
+                    MessageBox.Show("Veuillez sélectionner un utilisateur et un livre.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 int userId = selectedUser?.Id ?? 0;
                 int bookId = selectedBook?.Id ?? 0;
+
+                // Vérification si l'utilisateur a déjà un prêt en retard
+                bool userHasLateLend = lateLends.Any(lend => lend.IdUtilisateur == userId);
+
+                if (userHasLateLend)
+                {
+                    MessageBox.Show("L'utilisateur a déjà un prêt en retard et ne peut pas emprunter un autre livre.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
                 DateTime startDate = dtpStartDate.Value;
                 DateTime endDate = dtpEndDate.Value;
 
                 string query = "INSERT INTO emprunts (id_utilisateur, id_livre, date_debut, date_fin, etat) " +
-                               "VALUES (@UserId, @BookId, @StartDate, @EndDate, 'Not Returned')";
+                               "VALUES (@UserId, @BookId, @StartDate, @EndDate, 'Non retourné')";
 
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
                 cmd.Parameters.AddWithValue("@UserId", userId);
@@ -324,10 +330,11 @@ namespace BiblioTech
                 cmd.Parameters.AddWithValue("@EndDate", endDate);
 
                 cmd.ExecuteNonQuery();
-                MessageBox.Show("Information has been saved to the database.");
+                MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
             };
             pnlCreateLend.Controls.Add(btnSubmit);
         }
+
         private void PreloadData()
         {
             allLends = Lends.GetAll();

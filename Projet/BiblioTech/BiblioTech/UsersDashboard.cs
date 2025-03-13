@@ -55,8 +55,9 @@ namespace BiblioTech
             tblUsers = new TableLayoutPanel();
             tblUsers.AutoSize = false;
             tblUsers.Dock = DockStyle.Fill;
-            tblUsers.ColumnCount = 2;
             tblUsers.RowCount = 0;
+            tblUsers.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tblUsers.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tblUsers.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             tblUsers.Padding = new Padding(10);
             tblUsers.Margin = new Padding(5);
@@ -67,11 +68,15 @@ namespace BiblioTech
             {
                 Label lblUser = new Label();
                 lblUser.Text = utilisateur.Prenom + " " + utilisateur.Nom;
+                lblUser.Anchor = AnchorStyles.None;
+                lblUser.Padding = new Padding(5);
+                lblUser.AutoSize = true;
 
                 Button btnShowUserInfo = new Button();
                 btnShowUserInfo.Text = "Afficher infos";
                 btnShowUserInfo.AutoSize = true;
                 btnShowUserInfo.Padding = new Padding(5);
+                btnShowUserInfo.Anchor = AnchorStyles.None;
                 btnShowUserInfo.Click += (s, ev) =>
                 {
                     txtSelectedUserId.Text = "Infos de l'utilisateur" + Environment.NewLine +
@@ -123,6 +128,14 @@ namespace BiblioTech
                 string telephone = txtTelephone.Text;
                 string adresse = txtAdresse.Text;
                 string email = txtEmail.Text;
+
+                // Vérification si tous les champs sont remplis
+                if (string.IsNullOrEmpty(nom) || string.IsNullOrEmpty(prenom) || string.IsNullOrEmpty(telephone) ||
+                    string.IsNullOrEmpty(adresse) || string.IsNullOrEmpty(email))
+                {
+                    MessageBox.Show("Tous les champs doivent être remplis.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
                 string query = "INSERT INTO utilisateurs (nom, prenom, telephone, adresse_postale, adresse_email) VALUES (@Nom, @Prenom, @Telephone, @Adresse, @Email)";
 
