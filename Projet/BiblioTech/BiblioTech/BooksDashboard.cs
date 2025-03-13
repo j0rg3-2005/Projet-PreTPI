@@ -12,6 +12,7 @@ namespace BiblioTech
         TableLayoutPanel tblBooks;
         FlowLayoutPanel flpMain;
         Button btnBack;
+        Panel pnlAddBook;
         int paddingMargin = 15;
         TextBox txtSearch;
         Button btnSearch;
@@ -25,6 +26,14 @@ namespace BiblioTech
         {
             this.WindowState = FormWindowState.Maximized;
             this.Padding = new Padding(paddingMargin);
+            this.Controls.Add(btnBack);
+
+            btnBack = new Button();
+            btnBack.Text = "Retour";
+            btnBack.AutoSize = true;
+            btnBack.Padding = new Padding(5);
+            btnBack.Click += btnBack_Click;
+            btnBack.Location = new Point(paddingMargin, paddingMargin);
             this.Controls.Add(btnBack);
 
             txtSearch = new TextBox();
@@ -45,13 +54,12 @@ namespace BiblioTech
             flpMain = new FlowLayoutPanel();
             flpMain.Dock = DockStyle.Fill;
             flpMain.FlowDirection = FlowDirection.LeftToRight;
-            flpMain.Padding = new Padding(paddingMargin);
-            flpMain.Margin = new Padding(paddingMargin);
-            flpMain.BorderStyle = BorderStyle.FixedSingle;
+            flpMain.Padding = new Padding(paddingMargin, paddingMargin * 2, paddingMargin, paddingMargin);
             flpMain.AutoScroll = true;
             this.Controls.Add(flpMain);
 
             txtSelectedBookId = new TextBox();
+            txtSelectedBookId.Text = "Veuillez sélectionner un livre afin d'afficher les informations.";
             txtSelectedBookId.ReadOnly = true;
             txtSelectedBookId.Multiline = true;
             txtSelectedBookId.WordWrap = true;
@@ -74,12 +82,11 @@ namespace BiblioTech
             AddBooksToTable(books);
             flpMain.Controls.Add(tblBooks);
 
-            Panel pnlAddBook = new Panel();
+            pnlAddBook = new Panel();
             pnlAddBook.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
             pnlAddBook.Height = flpMain.Height - (4 * paddingMargin);
             pnlAddBook.AutoScroll = true;
             pnlAddBook.BorderStyle = BorderStyle.FixedSingle;
-
 
             AddBookFormControls(pnlAddBook);
             flpMain.Controls.Add(pnlAddBook);
@@ -87,6 +94,7 @@ namespace BiblioTech
 
         private void AddBooksToTable(List<Books> books)
         {
+            flpMain.Controls.Remove(tblBooks);
             tblBooks.Controls.Clear();
             tblBooks.RowCount = 0;
 
@@ -113,12 +121,19 @@ namespace BiblioTech
                     "\r\n\r\n- Date de publication : " + book.DatePublication.ToShortDateString();
                 };
 
-                int rowIndex = tblBooks.RowCount;
                 tblBooks.RowCount++;
-                tblBooks.Controls.Add(lblBook, 0, rowIndex);
-                tblBooks.Controls.Add(btnShowBookInfo, 1, rowIndex);
+                tblBooks.Controls.Add(lblBook, 0, tblBooks.RowCount);
+                tblBooks.Controls.Add(btnShowBookInfo, 1, tblBooks.RowCount);
             }
+            tblBooks.RowCount++;
+            tblBooks.Controls.Add(new Label(), 0, tblBooks.RowCount);
+            tblBooks.Controls.Add(new Label(), 1, tblBooks.RowCount);
+
+            flpMain.Controls.Add(txtSelectedBookId);
+            flpMain.Controls.Add(tblBooks);
+            flpMain.Controls.Add(pnlAddBook);
         }
+
 
         private void AddBookFormControls(Panel pnlAddBook)
         {
@@ -194,6 +209,12 @@ namespace BiblioTech
                 }
             }
             AddBooksToTable(filteredBooks);
+        }
+        private void btnBack_Click(object sender, EventArgs e)
+        {
+            frmChoiceMenu frmChoiceMenu = new frmChoiceMenu();
+            frmChoiceMenu.Show();
+            frmChoiceMenu.Closed += (s, args) => this.Close();
         }
     }
 }

@@ -36,11 +36,12 @@ namespace BiblioTech
             flpMain.Dock = DockStyle.Fill;
             flpMain.FlowDirection = FlowDirection.LeftToRight;
             flpMain.AutoScroll = true;
-            flpMain.Padding = new Padding(paddingMargin);
+            flpMain.Padding = new Padding(paddingMargin, paddingMargin * 2, paddingMargin, paddingMargin);
             this.Controls.Add(flpMain);
 
             // Création de la TextBox
             txtSelectedUserId = new TextBox();
+            txtSelectedUserId.Text = "Veuillez sélectionner un utilisateur afin d'afficher les informations.";
             txtSelectedUserId.ReadOnly = true;
             txtSelectedUserId.Multiline = true;
             txtSelectedUserId.WordWrap = true;

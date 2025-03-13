@@ -42,7 +42,7 @@ namespace BiblioTech
                 emprunt.IdUtilisateur = reader["id_utilisateur"] != DBNull.Value ? (int)reader["id_utilisateur"] : 0;
                 emprunt.IdLivre = reader["id_livre"] != DBNull.Value ? (int)reader["id_livre"] : 0;
                 emprunt.DateDebut = reader["date_debut"] != DBNull.Value ? (DateTime)reader["date_debut"] : DateTime.MinValue;
-                emprunt.DateFin = reader["date_fin"] != DBNull.Value ? (DateTime?)reader["date_fin"] : null;  // Nullable DateTime pour DateFin
+                emprunt.DateFin = reader["date_fin"] != DBNull.Value ? (DateTime?)reader["date_fin"] : DateTime.MinValue;
                 emprunt.Etat = reader["etat"] != DBNull.Value ? (string)reader["etat"] : string.Empty;
                 emprunt.NomUtilisateur = reader["NomUtilisateur"] != DBNull.Value ? (string)reader["NomUtilisateur"] : string.Empty;
                 emprunt.PrenomUtilisateur = reader["PrenomUtilisateur"] != DBNull.Value ? (string)reader["PrenomUtilisateur"] : string.Empty;
