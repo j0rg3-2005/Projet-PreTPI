@@ -10,6 +10,7 @@ namespace BiblioTech
     {
         TextBox txtSelectedUserId;
         TableLayoutPanel tblUsers;
+        Panel pnlAddUser;
         FlowLayoutPanel flpMain;
         Button btnBack;
         int paddingMargin = 15;
@@ -39,7 +40,6 @@ namespace BiblioTech
             flpMain.Padding = new Padding(paddingMargin, paddingMargin * 2, paddingMargin, paddingMargin);
             this.Controls.Add(flpMain);
 
-            // Création de la TextBox
             txtSelectedUserId = new TextBox();
             txtSelectedUserId.Text = "Veuillez sélectionner un utilisateur afin d'afficher les informations.";
             txtSelectedUserId.ReadOnly = true;
@@ -64,42 +64,10 @@ namespace BiblioTech
             tblUsers.AutoScroll = true;
 
             List<Users> utilisateurs = Users.GetAll();
-            foreach (var utilisateur in utilisateurs)
-            {
-                Label lblUser = new Label();
-                lblUser.Text = utilisateur.Prenom + " " + utilisateur.Nom;
-                lblUser.Anchor = AnchorStyles.None;
-                lblUser.Padding = new Padding(5);
-                lblUser.AutoSize = true;
-
-                Button btnShowUserInfo = new Button();
-                btnShowUserInfo.Text = "Afficher infos";
-                btnShowUserInfo.AutoSize = true;
-                btnShowUserInfo.Padding = new Padding(5);
-                btnShowUserInfo.Anchor = AnchorStyles.None;
-                btnShowUserInfo.Click += (s, ev) =>
-                {
-                    txtSelectedUserId.Text = "Infos de l'utilisateur" + Environment.NewLine +
-                    "\r\n- ID : " + utilisateur.Id +
-                    "\r\n- Prénom : " + utilisateur.Prenom +
-                    "\r\n- Nom : " + utilisateur.Nom +
-                    "\r\n- Num. de téléphone : " + utilisateur.Telephone +
-                    "\r\n- Adresse postale : " + utilisateur.AdressePostale +
-                    "\r\n- Courriel : " + utilisateur.AdresseEmail;
-                };
-
-                int rowIndex = tblUsers.RowCount;
-                tblUsers.RowCount++;
-                tblUsers.Controls.Add(lblUser, 0, rowIndex);
-                tblUsers.Controls.Add(btnShowUserInfo, 1, rowIndex);
-            }
-
-            int tblWidth = (int)(this.ClientSize.Width * 0.33) - (2 * paddingMargin);
-            tblUsers.Width = tblWidth;
+            CreateUserTable(utilisateurs);
 
             flpMain.Controls.Add(tblUsers);
-
-            Panel pnlAddUser = new Panel();
+            pnlAddUser = new Panel();
             pnlAddUser.Width = (int)(flpMain.Width * 0.3) - (2 * paddingMargin);
             pnlAddUser.Height = flpMain.Height - (4 * paddingMargin);
             pnlAddUser.AutoScroll = true;
@@ -123,11 +91,11 @@ namespace BiblioTech
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 180 };
             btnSubmit.Click += (sender, e) =>
             {
-                string nom = txtNom.Text;
-                string prenom = txtPrenom.Text;
-                string telephone = txtTelephone.Text;
-                string adresse = txtAdresse.Text;
-                string email = txtEmail.Text;
+                string nom = txtNom.Text.Trim();
+                string prenom = txtPrenom.Text.Trim();
+                string telephone = txtTelephone.Text.Trim();
+                string adresse = txtAdresse.Text.Trim();
+                string email = txtEmail.Text.Trim();
 
                 // Vérification si tous les champs sont remplis
                 if (string.IsNullOrEmpty(nom) || string.IsNullOrEmpty(prenom) || string.IsNullOrEmpty(telephone) ||
@@ -148,9 +116,23 @@ namespace BiblioTech
 
                 cmd.ExecuteNonQuery();
 
-                MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
-            };
+                try
+                {
+                    MessageBox.Show("Les informations ont été enregistrées dans la base de données.",
+                                    "Succès",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Information);
 
+                    CreateUserTable(Users.GetAll());
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Une erreur s'est produite lors de l'enregistrement des données. " + ex.Message,
+                                    "Erreur",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Error);
+                }
+            };
             pnlAddUser.Controls.Add(lblNom);
             pnlAddUser.Controls.Add(txtNom);
             pnlAddUser.Controls.Add(lblPrenom);
@@ -165,7 +147,50 @@ namespace BiblioTech
 
             flpMain.Controls.Add(pnlAddUser);
         }
+        private void CreateUserTable(List<Users> utilisateurs)
+        {
+            flpMain.Controls.Remove(tblUsers);
+            tblUsers.Controls.Clear();
+            tblUsers.RowCount = 0;
 
+            foreach (var utilisateur in utilisateurs)
+            {
+                Label lblUser = new Label();
+                lblUser.Text = utilisateur.Prenom + " " + utilisateur.Nom;
+                lblUser.Anchor = AnchorStyles.None;
+                lblUser.Padding = new Padding(5);
+                lblUser.AutoSize = true;
+
+                Button btnShowUserInfo = new Button();
+                btnShowUserInfo.Text = "Afficher infos";
+                btnShowUserInfo.AutoSize = true;
+                btnShowUserInfo.Padding = new Padding(5);
+                btnShowUserInfo.Anchor = AnchorStyles.None;
+                btnShowUserInfo.Click += (s, ev) =>
+                {
+                    txtSelectedUserId.Text = "Infos de l'utilisateur" + Environment.NewLine +
+                    "\r\n\r\n- ID : " + utilisateur.Id +
+                    "\r\n\r\n- Prénom : " + utilisateur.Prenom +
+                    "\r\n\r\n- Nom : " + utilisateur.Nom +
+                    "\r\n\r\n- Num. de téléphone : " + utilisateur.Telephone +
+                    "\r\n\r\n- Adresse postale : " + utilisateur.AdressePostale +
+                    "\r\n\r\n- Courriel : " + utilisateur.AdresseEmail;
+                };
+
+                int rowIndex = tblUsers.RowCount;
+                tblUsers.RowCount++;
+                tblUsers.Controls.Add(lblUser, 0, rowIndex);
+                tblUsers.Controls.Add(btnShowUserInfo, 1, rowIndex);
+            }
+            tblUsers.RowCount++;
+            tblUsers.Controls.Add(new Label(), 0, tblUsers.RowCount);
+            tblUsers.Controls.Add(new Label(), 1, tblUsers.RowCount);
+
+            int tblWidth = (int)(this.ClientSize.Width * 0.33) - (2 * paddingMargin);
+            tblUsers.Width = tblWidth;
+            flpMain.Controls.Add(tblUsers);
+            flpMain.Controls.Add(pnlAddUser);
+        }
         private void btnBack_Click(object sender, EventArgs e)
         {
             frmChoiceMenu frmChoiceMenu = new frmChoiceMenu();

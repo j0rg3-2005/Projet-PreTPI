@@ -1,5 +1,4 @@
 ﻿using MySqlConnector;
-using System.Drawing.Printing;
 namespace BiblioTech
 {
     public partial class frmLendsDashboard : Form
@@ -21,7 +20,6 @@ namespace BiblioTech
         {
             InitializeComponent();
         }
-
         private void frmLendsDashboard_Load(object sender, EventArgs e)
         {
             PreloadData();
@@ -67,7 +65,6 @@ namespace BiblioTech
             txtSelectedLendId.Height = (int)(flpMain.Height * 0.5) - (4 * paddingMargin);
             flpUserId.Controls.Add(txtSelectedLendId);
 
-
             btnCloseLend = new Button();
             btnCloseLend.Text = "Fermer le prêt";
             btnCloseLend.AutoSize = true;
@@ -101,7 +98,6 @@ namespace BiblioTech
 
             CreateLendFormControls(pnlCreateLend);
             flpMain.Controls.Add(pnlCreateLend);
-
         }
         private void LoadLends()
         {
@@ -110,97 +106,56 @@ namespace BiblioTech
             tblLends.RowCount = 0;
 
             List<Lends> lendsToDisplay = chkLateOnly.Checked ? lateLends : allLends;
+            tblLends.SuspendLayout();
 
             foreach (var lend in lendsToDisplay)
             {
-                Label lblLendId = new Label();
-                lblLendId.Text = lend.Id.ToString();
-                lblLendId.AutoSize = true;
-                lblLendId.Padding = new Padding(5);
+                int rowIndex = tblLends.RowCount;
+                tblLends.RowCount++;
 
-                Label lblUser = new Label();
-                lblUser.Text = lend.PrenomUtilisateur + " " + lend.NomUtilisateur;
-                lblUser.AutoSize = true;
-                lblUser.Padding = new Padding(5);
+                tblLends.Controls.Add(new Label { Text = lend.Id.ToString(), AutoSize = true, Padding = new Padding(5) }, 0, rowIndex);
+                tblLends.Controls.Add(new Label { Text = lend.PrenomUtilisateur + " " + lend.NomUtilisateur, AutoSize = true, Padding = new Padding(5) }, 1, rowIndex);
+                tblLends.Controls.Add(new Label { Text = lend.TitreLivre, AutoSize = true, Padding = new Padding(5) }, 2, rowIndex);
+                tblLends.Controls.Add(new Label { Text = lend.DateDebut.ToString(), AutoSize = true, Padding = new Padding(5) }, 3, rowIndex);
+                tblLends.Controls.Add(new Label { Text = lend.DateFin.ToString(), AutoSize = true, Padding = new Padding(5) }, 4, rowIndex);
+                tblLends.Controls.Add(new Label { Text = lend.Etat, AutoSize = true, Padding = new Padding(5) }, 5, rowIndex);
 
-                Label lblBook = new Label();
-                lblBook.Text = lend.TitreLivre;
-                lblBook.AutoSize = true;
-                lblBook.Padding = new Padding(5);
+                Button btnShowBookInfo = new Button { Text = "Afficher infos", AutoSize = true, Padding = new Padding(5) };
 
-                Label lblStartDate = new Label();
-                lblStartDate.Text = lend.DateDebut.ToString();
-                lblStartDate.AutoSize = true;
-                lblStartDate.Padding = new Padding(5);
-
-                Label lblEndDate = new Label();
-                lblEndDate.Text = lend.DateFin.ToString();
-                lblEndDate.AutoSize = true;
-                lblEndDate.Padding = new Padding(5);
-
-                Label lblState = new Label();
-                lblState.Text = lend.Etat;
-                lblState.AutoSize = true;
-                lblState.Padding = new Padding(5);
-
-                Button btnShowBookInfo = new Button();
-                btnShowBookInfo.Text = "Afficher infos";
-                btnShowBookInfo.AutoSize = true;
-                btnShowBookInfo.Padding = new Padding(5);
                 btnShowBookInfo.Click += (s, ev) =>
                 {
                     txtSelectedLendId.Text = "INFOS DE L'EMPRUNT" +
-                    "\r\n\r\n- ID : " + lend.Id.ToString()
-                    + "\r\n\r\n- Livre emprunté : " + lend.TitreLivre
-                    + "\r\n\r\n- Utilisateur : " + lend.PrenomUtilisateur
-                    + "\r\n\r\n- Date de début : " + lend.DateDebut
-                    + "\r\n\r\n- Date de fin : " + lend.DateFin
-                    + "\r\n\r\n- Etat : " + lend.Etat;
-                    if(lend.Etat == "Non retourné")
+                    "\r\n\r\n- ID : " + lend.Id.ToString() +
+                    "\r\n\r\n- Livre emprunté : " + lend.TitreLivre +
+                    "\r\n\r\n- Utilisateur : " + lend.PrenomUtilisateur +
+                    "\r\n\r\n- Date de début : " + lend.DateDebut +
+                    "\r\n\r\n- Date de fin : " + lend.DateFin +
+                    "\r\n\r\n- Etat : " + lend.Etat;
+
+                    flpUserId.Controls.Remove(btnCloseLend);
+                    flpUserId.Controls.Remove(btnReportStolen);
+
+                    btnCloseLend = new Button { Text = "Clôturer", AutoSize = true, Padding = new Padding(5) };
+                    btnReportStolen = new Button { Text = "Signaler volé", AutoSize = true, Padding = new Padding(5) };
+
+                    btnCloseLend.Enabled = false;
+                    btnReportStolen.Enabled = false;
+
+                    if (lend.Etat == "Non retourné")
                     {
                         btnCloseLend.Enabled = true;
                         btnReportStolen.Enabled = true;
-                        btnCloseLend.Click += (s, ev) =>
-                        {
-                            string updateQuery = "UPDATE emprunts SET Etat = 'Retourné' WHERE id = @LendId";
-                            MySqlCommand cmd = new MySqlCommand(updateQuery, Program.conn);
-                            cmd.Parameters.AddWithValue("@LendId", lend.Id);
-                            cmd.ExecuteNonQuery();
-
-                            MessageBox.Show("Le prêt a été marqué comme retourné.");
-                            PreloadData();
-                            LoadLends();
-
-                            btnCloseLend.Enabled = false;
-                            btnReportStolen.Enabled = false;
-                        };
-
-                        btnReportStolen.Click += (s, ev) =>
-                        {
-                            // Delete the lend record (as the book is reported stolen)
-                            string deleteQuery = "DELETE FROM emprunts WHERE id = @LendId";
-                            MySqlCommand cmd = new MySqlCommand(deleteQuery, Program.conn);
-                            cmd.Parameters.AddWithValue("@LendId", lend.Id);
-                            cmd.ExecuteNonQuery();
-
-                            MessageBox.Show("Le livre a été déclaré volé et le prêt a été supprimé.");
-                            PreloadData();
-                            LoadLends();
-
-                            btnCloseLend.Enabled = false;
-                            btnReportStolen.Enabled = false;
-                        };
+                        btnCloseLend.Click += (s, ev) => BtnCloseLend_Click(lend.Id, lend.IdLivre);
+                        btnReportStolen.Click += (s, ev) => BtnReportStolen_Click(lend.Id, lend.IdLivre);
                     }
+                    flpUserId.Controls.Add(btnCloseLend);
+                    flpUserId.Controls.Add(btnReportStolen);
                 };
 
-                int rowIndex = tblLends.RowCount;
-                tblLends.RowCount++;
-                for (int i = 0; i <= 6; i++)
-                {
-                    tblLends.Controls.Add(lblLendId, i, rowIndex);
-                }
+                tblLends.Controls.Add(btnShowBookInfo, 6, rowIndex);
             }
 
+            tblLends.ResumeLayout();
             tblLends.RowCount++;
             for (int i = 0; i <= 6; i++)
             {
@@ -220,61 +175,94 @@ namespace BiblioTech
                 Id = id;
                 DisplayText = displayText;
             }
-
-            public override string ToString() => DisplayText;  // Affiche le texte dans la ComboBox
+            public override string ToString() => DisplayText;
+        }
+        private void BtnCloseLend_Click(int lendId, int bookId)
+        {
+            string query = "UPDATE emprunts SET etat = 'Retourné' WHERE id = @lendId;" + "UPDATE livres SET etat = true WHERE id = @bookId;";
+            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+            cmd.Parameters.AddWithValue("@lendId", lendId);
+            cmd.Parameters.AddWithValue("@bookId", bookId);
+            try
+            {
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Le prêt a été fermé avec succès.");
+                PreloadData();
+                LoadLends();
+                txtSelectedLendId.Text = "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors de la fermeture du prêt : " + ex.Message);
+            }
         }
 
+        private void BtnReportStolen_Click(int lendId,int bookId)
+        {
+            string query = "UPDATE livres SET etat = false WHERE id = @bookid;" + "UPDATE emprunts SET etat = 'Volé / Perdu' WHERE id = @lendid;";
+            MySqlCommand cmd = new MySqlCommand(query, Program.conn);
+            cmd.Parameters.AddWithValue("@bookid", bookId);
+            cmd.Parameters.AddWithValue("@lendid", lendId);
+            try
+            {
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Le livre a été déclaré comme volé et est maintenant non disponible.");
+                PreloadData();
+                LoadLends();
+                txtSelectedLendId.Text = "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors de la déclaration de vol : " + ex.Message);
+            }
+        }
         private void CreateLendFormControls(Panel pnlCreateLend)
         {
-            List<Books> books = Books.GetAll(); // Liste des livres
-            List<Users> users = Users.GetAll(); // Liste des utilisateurs
+            List<Books> allBooks = Books.GetAll();
+            List<Books> availableBooks = allBooks.Where(b => b.Etat == 1).ToList();
+            List<Users> users = Users.GetAll();
 
-            // Create ComboBox for users
-            Label lblUser = new Label() { Text = "User:", Left = 10, Top = 20 };
+            Label lblUser = new Label() { Text = "Utilisateur :", Left = 10, Top = 20 };
             lblUser.AutoSize = true;
 
             ComboBox cmbUser = new ComboBox() { Left = 120, Top = 20, Width = 200 };
             cmbUser.DropDownStyle = ComboBoxStyle.DropDownList;
-
-            // Remplir ComboBox des utilisateurs avec l'objet ComboBoxItem
             foreach (var user in users)
             {
-                cmbUser.Items.Add(new ComboBoxItem(user.Id, user.Prenom + " " + user.Nom)); // Ajout de l'ID et du Nom
+                cmbUser.Items.Add(new ComboBoxItem(user.Id, user.Prenom + " " + user.Nom));
             }
 
             pnlCreateLend.Controls.Add(lblUser);
             pnlCreateLend.Controls.Add(cmbUser);
 
-            // Create ComboBox for books
-            Label lblBook = new Label() { Text = "Book Title:", Left = 10, Top = 50 };
+            Label lblBook = new Label() { Text = "Titre du livre :", Left = 10, Top = 50 };
             lblBook.AutoSize = true;
 
             ComboBox cmbBook = new ComboBox() { Left = 120, Top = 50, Width = 200 };
             cmbBook.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbBook.Items.Clear();
 
-            // Remplir ComboBox des livres avec l'objet ComboBoxItem
-            foreach (var book in books)
+            foreach (var book in availableBooks)
             {
-                cmbBook.Items.Add(new ComboBoxItem(book.Id, book.Titre)); // Ajout de l'ID et du Titre
+                cmbBook.Items.Add(new ComboBoxItem(book.Id, book.Titre));
             }
+            cmbBook.SelectedIndex = 0;
 
             pnlCreateLend.Controls.Add(lblBook);
             pnlCreateLend.Controls.Add(cmbBook);
 
-            // Date fields (using DateTimePicker)
-            Label lblStartDate = new Label() { Text = "Start Date:", Left = 10, Top = 80 };
+            Label lblStartDate = new Label() { Text = "Date de début:", Left = 10, Top = 80 };
             lblStartDate.AutoSize = true;
             DateTimePicker dtpStartDate = new DateTimePicker() { Left = 120, Top = 80, Width = 200, Format = DateTimePickerFormat.Short };
             pnlCreateLend.Controls.Add(lblStartDate);
             pnlCreateLend.Controls.Add(dtpStartDate);
 
-            Label lblEndDate = new Label() { Text = "End Date:", Left = 10, Top = 110 };
+            Label lblEndDate = new Label() { Text = "Date de fin :", Left = 10, Top = 110 };
             lblEndDate.AutoSize = true;
             DateTimePicker dtpEndDate = new DateTimePicker() { Left = 120, Top = 110, Width = 200, Format = DateTimePickerFormat.Short };
             pnlCreateLend.Controls.Add(lblEndDate);
             pnlCreateLend.Controls.Add(dtpEndDate);
 
-            // Empêcher la sélection d'une date de fin antérieure à la date de début
             dtpStartDate.ValueChanged += (s, e) =>
             {
                 if (dtpEndDate.Value < dtpStartDate.Value)
@@ -282,7 +270,6 @@ namespace BiblioTech
                     dtpEndDate.Value = dtpStartDate.Value;
                 }
             };
-
             dtpEndDate.ValueChanged += (s, e) =>
             {
                 if (dtpEndDate.Value < dtpStartDate.Value)
@@ -291,14 +278,12 @@ namespace BiblioTech
                     dtpEndDate.Value = dtpStartDate.Value;
                 }
             };
-
-            Button btnSubmit = new Button() { Text = "Submit", Left = 120, Top = 150 };
+            Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 150 };
             btnSubmit.Click += (sender, e) =>
             {
                 var selectedUser = cmbUser.SelectedItem as ComboBoxItem;
                 var selectedBook = cmbBook.SelectedItem as ComboBoxItem;
 
-                // Vérification des champs avant la soumission
                 if (selectedUser == null || selectedBook == null)
                 {
                     MessageBox.Show("Veuillez sélectionner un utilisateur et un livre.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -308,7 +293,6 @@ namespace BiblioTech
                 int userId = selectedUser?.Id ?? 0;
                 int bookId = selectedBook?.Id ?? 0;
 
-                // Vérification si l'utilisateur a déjà un prêt en retard
                 bool userHasLateLend = lateLends.Any(lend => lend.IdUtilisateur == userId);
 
                 if (userHasLateLend)
@@ -319,10 +303,9 @@ namespace BiblioTech
 
                 DateTime startDate = dtpStartDate.Value;
                 DateTime endDate = dtpEndDate.Value;
-
                 string query = "INSERT INTO emprunts (id_utilisateur, id_livre, date_debut, date_fin, etat) " +
-                               "VALUES (@UserId, @BookId, @StartDate, @EndDate, 'Non retourné')";
-
+                               "VALUES (@UserId, @BookId, @StartDate, @EndDate, 'Non retourné'); " +
+                               "UPDATE livres SET etat = 0 WHERE id = @BookId;";
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
                 cmd.Parameters.AddWithValue("@UserId", userId);
                 cmd.Parameters.AddWithValue("@BookId", bookId);
@@ -331,10 +314,13 @@ namespace BiblioTech
 
                 cmd.ExecuteNonQuery();
                 MessageBox.Show("Les informations ont été enregistrées dans la base de données.");
+
+                PreloadData();
+                LoadLends();
+                txtSelectedLendId.Text = "";
             };
             pnlCreateLend.Controls.Add(btnSubmit);
         }
-
         private void PreloadData()
         {
             allLends = Lends.GetAll();
