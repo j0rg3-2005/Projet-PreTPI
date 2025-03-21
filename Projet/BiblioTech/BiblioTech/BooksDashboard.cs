@@ -197,6 +197,10 @@ namespace BiblioTech
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
                 }
+                txtTitle.Clear();
+                txtAuthor.Clear();
+                txtGenre.Clear();
+                dtpPublicationDate.Value = DateTime.Now.Date;
             };
             pnlAddBook.Controls.Add(lblTitre);
             pnlAddBook.Controls.Add(txtTitle);

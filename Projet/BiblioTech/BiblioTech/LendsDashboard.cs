@@ -318,6 +318,12 @@ namespace BiblioTech
                 PreloadData();
                 LoadLends();
                 txtSelectedLendId.Text = "";
+
+                // Réinitialiser les champs du formulaire après la soumission réussie
+                cmbUser.SelectedIndex = -1;  // Réinitialise la ComboBox de l'utilisateur
+                cmbBook.SelectedIndex = -1;  // Réinitialise la ComboBox du livre
+                dtpStartDate.Value = DateTime.Now;  // Réinitialise la DateTimePicker de début à la date actuelle
+                dtpEndDate.Value = DateTime.Now.AddDays(1);  // Réinitialise la DateTimePicker de fin à 1 jour après la date actuelle
             };
             pnlCreateLend.Controls.Add(btnSubmit);
         }

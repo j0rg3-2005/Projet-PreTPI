@@ -89,6 +89,7 @@ namespace BiblioTech
             TextBox txtEmail = new TextBox() { Left = 120, Top = 140, Width = 200 };
 
             Button btnSubmit = new Button() { Text = "Soumettre", Left = 120, Top = 180 };
+            // Lors de la soumission du formulaire
             btnSubmit.Click += (sender, e) =>
             {
                 string nom = txtNom.Text.Trim();
@@ -105,6 +106,13 @@ namespace BiblioTech
                     return;
                 }
 
+                // Vérification de la présence de "@" dans l'email
+                if (!email.Contains("@"))
+                {
+                    MessageBox.Show("L'adresse email doit contenir un '@'.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 string query = "INSERT INTO utilisateurs (nom, prenom, telephone, adresse_postale, adresse_email) VALUES (@Nom, @Prenom, @Telephone, @Adresse, @Email)";
 
                 MySqlCommand cmd = new MySqlCommand(query, Program.conn);
@@ -114,14 +122,21 @@ namespace BiblioTech
                 cmd.Parameters.AddWithValue("@Adresse", adresse);
                 cmd.Parameters.AddWithValue("@Email", email);
 
-                cmd.ExecuteNonQuery();
-
                 try
                 {
+                    cmd.ExecuteNonQuery();
+
+                    // Réinitialisation des champs après soumission
+                    txtNom.Clear();
+                    txtPrenom.Clear();
+                    txtTelephone.Clear();
+                    txtAdresse.Clear();
+                    txtEmail.Clear();
+
                     MessageBox.Show("Les informations ont été enregistrées dans la base de données.",
-                                    "Succès",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Information);
+                                     "Succès",
+                                     MessageBoxButtons.OK,
+                                     MessageBoxIcon.Information);
 
                     CreateUserTable(Users.GetAll());
                 }
